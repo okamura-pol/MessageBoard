@@ -65,7 +65,7 @@ jobs:
 
 workflows:
   version: 2
-  check-and-deploy:
+  check:
     jobs:
       - rubocop
       - rspec:
