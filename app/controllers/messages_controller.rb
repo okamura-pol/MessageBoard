@@ -14,10 +14,13 @@ class MessagesController < ApplicationController
   # GET /messages/new
   def new
     @message = Message.new
+    @user = User.find_by(id: current_user.id)
   end
 
   # GET /messages/1/edit
-  def edit; end
+  def edit
+    @user = User.find_by(id: @message.user_id)
+  end
 
   # POST /messages
   # POST /messages.json
