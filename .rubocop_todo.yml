@@ -1,0 +1,21 @@
+require: rubocop-rails
+
+Rails:
+  Enabled: true
+
+Style/Documentation:
+  Enabled: false
+
+Style/FrozenStringLiteralComment:
+  Enabled: false
+
+AllCops:
+  Exclude:
+    - "db/schema.rb"
+    - "vendor/**/*"
+    - "node_modules/**/*"
+    - "bin/*"
+
+Layout/LineLength:
+  Exclude:
+    - 'config/initializers/devise.rb'

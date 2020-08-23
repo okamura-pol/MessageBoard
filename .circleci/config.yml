@@ -1,0 +1,73 @@
+version: 2.1
+
+commands:
+  bundle-installation:
+    description: "checkout and bundle installation and caching"
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "Gemfile.lock" }}
+            - v1-dependencies-
+      - run: bundle install --jobs=4 --retry=3 --path vendor/bundle
+      - save_cache:
+          paths:
+            - ./vendor/bundle
+          key: v1-dependencies-{{ checksum "Gemfile.lock" }}
+
+  yarn-installation:
+    description: "yarn installation and caching"
+    steps:
+      - restore_cache:
+          keys:
+            - v1-yarn-{{ checksum "yarn.lock" }}
+            - v1-yarn-
+      - run: yarn install
+      - save_cache:
+          key: v1-yarn-{{ checksum "yarn.lock" }}
+          paths:
+            - ./node_modules
+
+jobs:
+  rubocop:
+    docker:
+      - image: circleci/ruby:2.7.1-node-browsers
+    working_directory: ~/MessageBoard
+    steps:
+      - bundle-installation
+      - run:
+          name: RuboCop
+          command: bundle exec rubocop
+  rspec:
+    docker:
+      - image: circleci/ruby:2.7.1-node-browsers
+        environment:
+          RAILS_ENV: test
+          RAILS_DATABASE_HOST: postgres
+      - image: postgres:12.3-alpine
+        name: postgres
+        environment:
+          POSTGRES_DATABASE: messageboard_test
+          POSTGRES_USER: messageboard
+          POSTGRES_PASSWORD: messageboard
+    working_directory: ~/MessageBoard
+    steps:
+      - bundle-installation
+      - yarn-installation
+      - run:
+          name: DB Migration
+          command: |
+            bundle exec rails db:create
+            bundle exec rails db:migrate
+      - run:
+          name: RSpec
+          command: bundle exec rspec
+
+workflows:
+  version: 2
+  check:
+    jobs:
+      - rubocop
+      - rspec:
+          requires:
+            - rubocop
