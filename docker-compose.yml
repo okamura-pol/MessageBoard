@@ -1,0 +1,10 @@
+version: "3"
+services:
+  postgres:
+    image: postgres:12.3
+    environment:
+      POSTGRES_DB: messageboard_development
+      POSTGRES_USER: messageboard
+      POSTGRES_PASSWORD: messageboard
+    ports:
+      - 5432:5432
